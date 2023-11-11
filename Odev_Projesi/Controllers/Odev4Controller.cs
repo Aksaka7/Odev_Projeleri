@@ -24,6 +24,7 @@ namespace Odev_Projesi.Controllers
             SerializationUser? serializationUser = await client.GetFromJsonAsync<SerializationUser>($"users/{userId}");
             SerializationUser user = serializationUser;
 
+
             if (user != null)
             {
                 // Nesneyi JSON formatına çevirme
