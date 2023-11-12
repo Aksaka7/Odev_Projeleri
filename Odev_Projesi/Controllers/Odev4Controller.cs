@@ -9,8 +9,16 @@ namespace Odev_Projesi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class Odev4Controller : ControllerBase
+    public class Odev4Controller : ControllerBase 
     {
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        //IWebHostEnvironment özeligi dosya yükleme gibi işlemlerde sunucunun fiziksel
+        //dosya yollarına erişmenizi ve bu dosyalara yazma veya okuma işlemleri yapmanızı sağlar.
+        public Odev4Controller(IWebHostEnvironment webHostEnvironment)
+        {
+            _webHostEnvironment = webHostEnvironment;
+        }
+
         [HttpGet]
         [Route("JSON_Odev4_Serialize")]
         public async Task<IActionResult> JsonIslemleri()
@@ -30,7 +38,6 @@ namespace Odev_Projesi.Controllers
                 // Nesneyi JSON formatına çevirme
                 string jsonResult = JsonConvert.SerializeObject(user);
 
-                // JSON'ı response body olarak döndürme
                 return Ok(jsonResult);
             }
             else
@@ -65,32 +72,47 @@ namespace Odev_Projesi.Controllers
 
             return Ok();
         }
+
+
         [HttpPost]
         [Route("Dosyaupload")]
-        public async Task<IActionResult> OnPostUploadAsync(List<IFormFile> files, [FromServices] IWebHostEnvironment webHostEnvironment)
+        public IActionResult Dossyayukle(IFormFile files)
         {
-            long size = files.Sum(f => f.Length);
-            string path = @"C:\Users\Mehmet_Asker\source\repos\Odevteslimapp18\Odev_Projesi\Properties\www";
-
-
-            foreach (var formFile in files)
+            if (files.Length > 0)
             {
-                if (formFile.Length > 0)
+                var filePath = Path.GetTempFileName();
+
+                using var stream = System.IO.File.Create(filePath);
+
+                files.CopyTo(stream);
+            }
+            
+
+            return Ok();
+        }
+
+
+        [HttpPost]
+        [Route("Dosyauploads")]
+        public IActionResult DosyaYukles(IFormFile file)
+        {
+            if (file != null && file.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "documents");
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    var filePath = Path.GetTempFileName();
-
-
-                    using (var stream = System.IO.File.Create(filePath))
-                    {
-                        await formFile.CopyToAsync(stream);
-                    }
+                    file.CopyTo(stream);
                 }
+
+                return Ok("Dosya yükleme başarılı!");
             }
 
-          
-
-            return Ok(new { count = files.Count, size });
+            return BadRequest("Dosya yüklenemedi.");
         }
+
 
     }
 }
