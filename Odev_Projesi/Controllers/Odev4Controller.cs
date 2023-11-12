@@ -75,24 +75,6 @@ namespace Odev_Projesi.Controllers
 
 
         [HttpPost]
-        [Route("Dosyaupload")]
-        public IActionResult Dossyayukle(IFormFile files)
-        {
-            if (files.Length > 0)
-            {
-                var filePath = Path.GetTempFileName();
-
-                using var stream = System.IO.File.Create(filePath);
-
-                files.CopyTo(stream);
-            }
-            
-
-            return Ok();
-        }
-
-
-        [HttpPost]
         [Route("Dosyauploads")]
         public IActionResult DosyaYukles(IFormFile file)
         {
